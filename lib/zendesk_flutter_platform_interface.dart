@@ -14,7 +14,7 @@ abstract class ZendeskFlutterPlatform extends PlatformInterface {
   ///
   /// Defaults to [MethodChannelZendeskFlutter].
   static ZendeskFlutterPlatform get instance => _instance;
-  
+
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [ZendeskFlutterPlatform] when
   /// they register themselves.
