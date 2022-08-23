@@ -3,10 +3,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+
+        // Configure the Maven repository address for the Zendesk SDK.
+        maven { url 'https://zendesk.jfrog.io/zendesk/repo' }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -15,6 +18,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+
+        // Configure the Maven repository address for the Zendesk SDK.
+        maven { url 'https://zendesk.jfrog.io/zendesk/repo' }
     }
 }
 
