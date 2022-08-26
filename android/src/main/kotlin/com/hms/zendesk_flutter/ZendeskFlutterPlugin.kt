@@ -6,23 +6,38 @@ import android.content.Intent
 import android.text.TextUtils
 import androidx.annotation.NonNull
 import com.zendesk.logger.Logger
+import com.zendesk.service.ErrorResponse
+import com.zendesk.service.ZendeskCallback
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import zendesk.chat.*
+import zendesk.configurations.Configuration
 import zendesk.core.AnonymousIdentity
 import zendesk.core.Identity
 import zendesk.core.Zendesk
 import zendesk.messaging.Engine
+import zendesk.messaging.MessagingActivity
 import zendesk.support.Support
-import zendesk.support.SupportEngine
 import zendesk.support.guide.HelpCenterActivity
+import zendesk.support.guide.HelpCenterConfiguration
 
 /** ZendeskFlutterPlugin */
 class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.SupportSDKApi,
     ZendeskPigeon.ChatSDKV2Api, ZendeskPigeon.ZendeskSDKApi, ZendeskPigeon.ProfileProviderApi {
     private var applicationContext: Context? = null
     private var activity: Activity? = null
+
+    private val chatConnectionObservationScope = ObservationScope()
+    private val chatConnectionObservationLoggerTag = "ChatConnectionLogger"
+
+    private val chatSessionObservationScope = ObservationScope()
+    private val chatSessionObservationLoggerTag = "ChatSessionLogger"
+
+    private var visitorNoteToSet: String = ""
+
+    private var visitorTagsToAdd: List<String> = listOf()
+    private var visitorTagsToRemove: List<String> = listOf()
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         ZendeskPigeon.SupportSDKApi.setup(flutterPluginBinding.binaryMessenger, this)
@@ -71,26 +86,20 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
         Support.INSTANCE.init(Zendesk.INSTANCE)
     }
 
-    override fun setAnonymousIdentity() {
-        val identity: Identity = AnonymousIdentity()
-        Zendesk.INSTANCE.setIdentity(identity)
-    }
-
     override fun showHelpCenter() {
         val activity = getActivity()
         val applicationContext = getApplicationContext()
 
-        val supportEngine: Engine = SupportEngine.engine()
         val chatEngine: Engine? = ChatEngine.engine()
 
-        val chatConfiguration = ChatConfiguration.builder()
-            .withAgentAvailabilityEnabled(false)
-            .build()
+        val helpCenterConfiguration: Configuration = HelpCenterConfiguration.Builder()
+            .withShowConversationsMenuButton(false)
+            .withEngines(chatEngine)
+            .config()
 
         activity.startActivity(
             HelpCenterActivity.builder()
-                .withEngines(chatEngine, supportEngine)
-                .intent(applicationContext, chatConfiguration)
+                .intent(applicationContext, helpCenterConfiguration)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
@@ -108,62 +117,186 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
             request.appId,
         )
 
+        getChatConnectionProvider().observeConnectionStatus(
+            chatConnectionObservationScope
+        ) { t ->
+            when (t) {
+                ConnectionStatus.CONNECTED -> {
+                    val profileProvider = getChatProfileProvider()
+                    profileProvider.addVisitorTags(visitorTagsToAdd, null)
+                    profileProvider.removeVisitorTags(visitorTagsToRemove, null)
+
+                    Logger.i(
+                        chatConnectionObservationLoggerTag,
+                        "Connected to chat"
+                    )
+                }
+                ConnectionStatus.CONNECTING -> Logger.i(
+                    chatConnectionObservationLoggerTag,
+                    "Connecting to chat"
+                )
+                ConnectionStatus.DISCONNECTED -> Logger.i(
+                    chatConnectionObservationLoggerTag,
+                    "Disconnected"
+                )
+                ConnectionStatus.FAILED -> Logger.i(
+                    chatConnectionObservationLoggerTag,
+                    "Failed to connect"
+                )
+                ConnectionStatus.UNREACHABLE -> Logger.i(
+                    chatConnectionObservationLoggerTag,
+                    "Unreachable"
+                )
+                ConnectionStatus.RECONNECTING -> Logger.i(
+                    chatConnectionObservationLoggerTag,
+                    "Reconnecting"
+                )
+                else -> {
+                    Logger.e(
+                        chatConnectionObservationLoggerTag,
+                        "Unknown connection status $t"
+                    )
+                }
+            }
+        }
+
+        Chat.INSTANCE.providers()?.chatProvider()
+            ?.observeChatState(chatSessionObservationScope) { t ->
+                Logger.i(
+                    chatSessionObservationLoggerTag,
+                    "LogSize ${t.chatLogs.size}"
+                )
+                when (t.chatSessionStatus) {
+                    ChatSessionStatus.CONFIGURING ->
+                        Logger.i(
+                            chatSessionObservationLoggerTag,
+                            "CONFIGURING"
+                        )
+                    ChatSessionStatus.INITIALIZING -> {
+                        Logger.i(
+                            chatSessionObservationLoggerTag,
+                            "INITIALIZING"
+                        )
+                    }
+                    ChatSessionStatus.STARTED -> {
+                        if (t.chatLogs.size == 2 && visitorNoteToSet.isNotEmpty()) {
+                            Chat.INSTANCE.providers()?.chatProvider()?.sendMessage(visitorNoteToSet)
+                        }
+                        Logger.i(
+                            chatSessionObservationLoggerTag,
+                            "STARTED"
+                        )
+                    }
+                    ChatSessionStatus.ENDING -> Logger.i(
+                        chatSessionObservationLoggerTag,
+                        "ENDING"
+                    )
+                    ChatSessionStatus.ENDED -> {
+                        Logger.i(
+                            chatSessionObservationLoggerTag,
+                            "ENDED"
+                        )
+                    }
+                }
+            }
+    }
+
+    override fun registerPushToken(request: ZendeskPigeon.RegisterPushTokenRequest) {
         val pushProvider = Chat.INSTANCE.providers()!!.pushNotificationsProvider()
         pushProvider?.registerPushToken(
             request.pushToken,
         )
     }
 
-    override fun setVisitorInfo(request: ZendeskPigeon.SetVisitorInfoRequest) {
-        val profileProvider: ProfileProvider = getProfileProvider()
+    override fun startChat() {
+        val activity = getActivity()
+        val applicationContext = getApplicationContext()
 
-        var builder: VisitorInfo.Builder = VisitorInfo.builder()
+        val chatEngine: Engine? = ChatEngine.engine()
+
+        activity.startActivity(
+            MessagingActivity.builder()
+                .withEngines(chatEngine)
+                .intent(applicationContext)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }
+
+    override fun setVisitorIdentity(request: ZendeskPigeon.SetVisitorIdentityRequest) {
+        var visitorInfo = VisitorInfo.builder()
         if (!TextUtils.isEmpty(request.name)) {
-            builder = builder.withName(request.name)
+            visitorInfo = visitorInfo.withName(request.name)
         }
+
         if (!TextUtils.isEmpty(request.email)) {
-            builder = builder.withEmail(request.email)
+            visitorInfo = visitorInfo.withEmail(request.email)
         }
+
         if (!TextUtils.isEmpty(request.phoneNumber)) {
-            builder = builder.withPhoneNumber(request.phoneNumber)
+            visitorInfo = visitorInfo.withPhoneNumber(request.phoneNumber)
         }
 
-        profileProvider.setVisitorInfo(builder.build(), null)
-    }
+        val chatProvidersConfiguration = ChatProvidersConfiguration.builder()
+            .withVisitorInfo(visitorInfo.build())
+            .build()
 
-    override fun addVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
-        val profileProvider = getProfileProvider()
-        profileProvider.addVisitorTags(request.tags, null)
-    }
+        Chat.INSTANCE.chatProvidersConfiguration = chatProvidersConfiguration
 
-    override fun removeVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
-        val profileProvider = getProfileProvider()
-        profileProvider.removeVisitorTags(request.tags, null)
-    }
+        val identity: Identity = AnonymousIdentity.Builder()
+            .withNameIdentifier(request.name)
+            .withEmailIdentifier(request.email)
+            .build()
 
-    override fun setVisitorNote(request: ZendeskPigeon.VisitorNoteRequest) {
-        val profileProvider = getProfileProvider()
-        profileProvider.setVisitorNote(request.note)
-    }
+        Zendesk.INSTANCE.setIdentity(identity)
 
-    override fun appendVisitorNote(request: ZendeskPigeon.VisitorNoteRequest) {
-        val profileProvider = getProfileProvider()
-        profileProvider.appendVisitorNote(request.note)
-    }
+        val userProvider = Zendesk.INSTANCE.provider()!!.userProvider()
+        val userFields: MutableMap<String, String> = HashMap()
+        userFields["user_attributes"] = visitorNoteToSet
 
-    override fun clearVisitorNotes() {
-        val profileProvider = getProfileProvider()
-        profileProvider.clearVisitorNotes(null)
+        userProvider.setUserFields(
+            userFields,
+            object : ZendeskCallback<Map<String?, String?>?>() { // handle callbacks
+                override fun onSuccess(result: Map<String?, String?>?) {
+                    Logger.i("UserFields", "Successfully set user fields.")
+                }
+
+                override fun onError(error: ErrorResponse?) {
+                    Logger.e("UserFields", "Failed to set user fields.")
+                }
+            })
     }
 
     override fun clearVisitorInfo() {
+        visitorNoteToSet = ""
+        visitorTagsToAdd = listOf()
+        visitorTagsToRemove = listOf()
+
         Chat.INSTANCE.resetIdentity()
     }
 
-    private fun getProfileProvider(): ProfileProvider {
+    override fun addVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
+        visitorTagsToAdd = request.tags
+    }
+
+    override fun removeVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
+        visitorTagsToRemove = request.tags
+    }
+
+    override fun setVisitorCustomInfo(request: ZendeskPigeon.SetVisitorCustomInfoRequest) {
+        visitorNoteToSet = request.customInfo;
+    }
+
+    private fun getChatProfileProvider(): ProfileProvider {
         val providers = Chat.INSTANCE.providers()
-            ?: throw java.lang.IllegalArgumentException("{Providers not set, did you initialized Chat SDK?")
+            ?: throw java.lang.IllegalArgumentException("ChatProviders not set, did you initialized Chat SDK?")
+
         return providers.profileProvider()
+    }
+
+    private fun getChatConnectionProvider(): ConnectionProvider {
+        val providers = Chat.INSTANCE.providers()
+            ?: throw java.lang.IllegalArgumentException("ChatProviders not set, did you initialized Chat SDK?")
+        return providers.connectionProvider()
     }
 
     private fun getApplicationContext(): Context {

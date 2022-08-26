@@ -11,9 +11,10 @@ NS_ASSUME_NONNULL_BEGIN
 @class SetLoggableRequest;
 @class SupportSDKInitializeRequest;
 @class ChatSDKV2InitializeRequest;
-@class SetVisitorInfoRequest;
+@class RegisterPushTokenRequest;
+@class SetVisitorIdentityRequest;
 @class VisitorTagsRequest;
-@class VisitorNoteRequest;
+@class SetVisitorCustomInfoRequest;
 
 @interface SetLoggableRequest : NSObject
 /// `init` unavailable to enforce nonnull fields, see the `make` class method.
@@ -37,14 +38,19 @@ NS_ASSUME_NONNULL_BEGIN
 /// `init` unavailable to enforce nonnull fields, see the `make` class method.
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)makeWithAccountKey:(NSString *)accountKey
-    appId:(NSString *)appId
-    pushToken:(NSString *)pushToken;
+    appId:(NSString *)appId;
 @property(nonatomic, copy) NSString * accountKey;
 @property(nonatomic, copy) NSString * appId;
+@end
+
+@interface RegisterPushTokenRequest : NSObject
+/// `init` unavailable to enforce nonnull fields, see the `make` class method.
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)makeWithPushToken:(NSString *)pushToken;
 @property(nonatomic, copy) NSString * pushToken;
 @end
 
-@interface SetVisitorInfoRequest : NSObject
+@interface SetVisitorIdentityRequest : NSObject
 + (instancetype)makeWithName:(nullable NSString *)name
     email:(nullable NSString *)email
     phoneNumber:(nullable NSString *)phoneNumber;
@@ -60,11 +66,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong) NSArray<NSString *> * tags;
 @end
 
-@interface VisitorNoteRequest : NSObject
+@interface SetVisitorCustomInfoRequest : NSObject
 /// `init` unavailable to enforce nonnull fields, see the `make` class method.
 - (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)makeWithNote:(NSString *)note;
-@property(nonatomic, copy) NSString * note;
++ (instancetype)makeWithCustomInfo:(NSString *)customInfo;
+@property(nonatomic, copy) NSString * customInfo;
 @end
 
 /// The codec used by ZendeskSDKApi.
@@ -81,7 +87,6 @@ NSObject<FlutterMessageCodec> *SupportSDKApiGetCodec(void);
 
 @protocol SupportSDKApi
 - (void)initializeSupportSDKRequest:(SupportSDKInitializeRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)setAnonymousIdentityWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)showHelpCenterWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
@@ -92,6 +97,8 @@ NSObject<FlutterMessageCodec> *ChatSDKV2ApiGetCodec(void);
 
 @protocol ChatSDKV2Api
 - (void)initializeChatSDKRequest:(ChatSDKV2InitializeRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)registerPushTokenRequest:(RegisterPushTokenRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)startChatWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<ChatSDKV2Api> *_Nullable api);
@@ -100,12 +107,10 @@ extern void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObje
 NSObject<FlutterMessageCodec> *ProfileProviderApiGetCodec(void);
 
 @protocol ProfileProviderApi
-- (void)setVisitorInfoRequest:(SetVisitorInfoRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setVisitorIdentityRequest:(SetVisitorIdentityRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)addVisitorTagsRequest:(VisitorTagsRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)removeVisitorTagsRequest:(VisitorTagsRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)setVisitorNoteRequest:(VisitorNoteRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)appendVisitorNoteRequest:(VisitorNoteRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)clearVisitorNotesWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setVisitorCustomInfoRequest:(SetVisitorCustomInfoRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)clearVisitorInfoWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 

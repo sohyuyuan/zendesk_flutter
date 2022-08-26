@@ -154,15 +154,6 @@ public class ZendeskPigeon {
       this.appId = setterArg;
     }
 
-    private @NonNull String pushToken;
-    public @NonNull String getPushToken() { return pushToken; }
-    public void setPushToken(@NonNull String setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"pushToken\" is null.");
-      }
-      this.pushToken = setterArg;
-    }
-
     /** Constructor is private to enforce null safety; use Builder. */
     private ChatSDKV2InitializeRequest() {}
     public static final class Builder {
@@ -176,16 +167,10 @@ public class ZendeskPigeon {
         this.appId = setterArg;
         return this;
       }
-      private @Nullable String pushToken;
-      public @NonNull Builder setPushToken(@NonNull String setterArg) {
-        this.pushToken = setterArg;
-        return this;
-      }
       public @NonNull ChatSDKV2InitializeRequest build() {
         ChatSDKV2InitializeRequest pigeonReturn = new ChatSDKV2InitializeRequest();
         pigeonReturn.setAccountKey(accountKey);
         pigeonReturn.setAppId(appId);
-        pigeonReturn.setPushToken(pushToken);
         return pigeonReturn;
       }
     }
@@ -193,7 +178,6 @@ public class ZendeskPigeon {
       Map<String, Object> toMapResult = new HashMap<>();
       toMapResult.put("accountKey", accountKey);
       toMapResult.put("appId", appId);
-      toMapResult.put("pushToken", pushToken);
       return toMapResult;
     }
     static @NonNull ChatSDKV2InitializeRequest fromMap(@NonNull Map<String, Object> map) {
@@ -202,6 +186,42 @@ public class ZendeskPigeon {
       pigeonResult.setAccountKey((String)accountKey);
       Object appId = map.get("appId");
       pigeonResult.setAppId((String)appId);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static class RegisterPushTokenRequest {
+    private @NonNull String pushToken;
+    public @NonNull String getPushToken() { return pushToken; }
+    public void setPushToken(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"pushToken\" is null.");
+      }
+      this.pushToken = setterArg;
+    }
+
+    /** Constructor is private to enforce null safety; use Builder. */
+    private RegisterPushTokenRequest() {}
+    public static final class Builder {
+      private @Nullable String pushToken;
+      public @NonNull Builder setPushToken(@NonNull String setterArg) {
+        this.pushToken = setterArg;
+        return this;
+      }
+      public @NonNull RegisterPushTokenRequest build() {
+        RegisterPushTokenRequest pigeonReturn = new RegisterPushTokenRequest();
+        pigeonReturn.setPushToken(pushToken);
+        return pigeonReturn;
+      }
+    }
+    @NonNull Map<String, Object> toMap() {
+      Map<String, Object> toMapResult = new HashMap<>();
+      toMapResult.put("pushToken", pushToken);
+      return toMapResult;
+    }
+    static @NonNull RegisterPushTokenRequest fromMap(@NonNull Map<String, Object> map) {
+      RegisterPushTokenRequest pigeonResult = new RegisterPushTokenRequest();
       Object pushToken = map.get("pushToken");
       pigeonResult.setPushToken((String)pushToken);
       return pigeonResult;
@@ -209,7 +229,7 @@ public class ZendeskPigeon {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
-  public static class SetVisitorInfoRequest {
+  public static class SetVisitorIdentityRequest {
     private @Nullable String name;
     public @Nullable String getName() { return name; }
     public void setName(@Nullable String setterArg) {
@@ -244,8 +264,8 @@ public class ZendeskPigeon {
         this.phoneNumber = setterArg;
         return this;
       }
-      public @NonNull SetVisitorInfoRequest build() {
-        SetVisitorInfoRequest pigeonReturn = new SetVisitorInfoRequest();
+      public @NonNull SetVisitorIdentityRequest build() {
+        SetVisitorIdentityRequest pigeonReturn = new SetVisitorIdentityRequest();
         pigeonReturn.setName(name);
         pigeonReturn.setEmail(email);
         pigeonReturn.setPhoneNumber(phoneNumber);
@@ -259,8 +279,8 @@ public class ZendeskPigeon {
       toMapResult.put("phoneNumber", phoneNumber);
       return toMapResult;
     }
-    static @NonNull SetVisitorInfoRequest fromMap(@NonNull Map<String, Object> map) {
-      SetVisitorInfoRequest pigeonResult = new SetVisitorInfoRequest();
+    static @NonNull SetVisitorIdentityRequest fromMap(@NonNull Map<String, Object> map) {
+      SetVisitorIdentityRequest pigeonResult = new SetVisitorIdentityRequest();
       Object name = map.get("name");
       pigeonResult.setName((String)name);
       Object email = map.get("email");
@@ -310,39 +330,39 @@ public class ZendeskPigeon {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
-  public static class VisitorNoteRequest {
-    private @NonNull String note;
-    public @NonNull String getNote() { return note; }
-    public void setNote(@NonNull String setterArg) {
+  public static class SetVisitorCustomInfoRequest {
+    private @NonNull String customInfo;
+    public @NonNull String getCustomInfo() { return customInfo; }
+    public void setCustomInfo(@NonNull String setterArg) {
       if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"note\" is null.");
+        throw new IllegalStateException("Nonnull field \"customInfo\" is null.");
       }
-      this.note = setterArg;
+      this.customInfo = setterArg;
     }
 
     /** Constructor is private to enforce null safety; use Builder. */
-    private VisitorNoteRequest() {}
+    private SetVisitorCustomInfoRequest() {}
     public static final class Builder {
-      private @Nullable String note;
-      public @NonNull Builder setNote(@NonNull String setterArg) {
-        this.note = setterArg;
+      private @Nullable String customInfo;
+      public @NonNull Builder setCustomInfo(@NonNull String setterArg) {
+        this.customInfo = setterArg;
         return this;
       }
-      public @NonNull VisitorNoteRequest build() {
-        VisitorNoteRequest pigeonReturn = new VisitorNoteRequest();
-        pigeonReturn.setNote(note);
+      public @NonNull SetVisitorCustomInfoRequest build() {
+        SetVisitorCustomInfoRequest pigeonReturn = new SetVisitorCustomInfoRequest();
+        pigeonReturn.setCustomInfo(customInfo);
         return pigeonReturn;
       }
     }
     @NonNull Map<String, Object> toMap() {
       Map<String, Object> toMapResult = new HashMap<>();
-      toMapResult.put("note", note);
+      toMapResult.put("customInfo", customInfo);
       return toMapResult;
     }
-    static @NonNull VisitorNoteRequest fromMap(@NonNull Map<String, Object> map) {
-      VisitorNoteRequest pigeonResult = new VisitorNoteRequest();
-      Object note = map.get("note");
-      pigeonResult.setNote((String)note);
+    static @NonNull SetVisitorCustomInfoRequest fromMap(@NonNull Map<String, Object> map) {
+      SetVisitorCustomInfoRequest pigeonResult = new SetVisitorCustomInfoRequest();
+      Object customInfo = map.get("customInfo");
+      pigeonResult.setCustomInfo((String)customInfo);
       return pigeonResult;
     }
   }
@@ -438,7 +458,6 @@ public class ZendeskPigeon {
   /** Generated interface from Pigeon that represents a handler of messages from Flutter.*/
   public interface SupportSDKApi {
     void initializeSupportSDK(@NonNull SupportSDKInitializeRequest request);
-    void setAnonymousIdentity();
     void showHelpCenter();
 
     /** The codec used by SupportSDKApi. */
@@ -461,25 +480,6 @@ public class ZendeskPigeon {
                 throw new NullPointerException("requestArg unexpectedly null.");
               }
               api.initializeSupportSDK(requestArg);
-              wrapped.put("result", null);
-            }
-            catch (Error | RuntimeException exception) {
-              wrapped.put("error", wrapError(exception));
-            }
-            reply.reply(wrapped);
-          });
-        } else {
-          channel.setMessageHandler(null);
-        }
-      }
-      {
-        BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.SupportSDKApi.setAnonymousIdentity", getCodec());
-        if (api != null) {
-          channel.setMessageHandler((message, reply) -> {
-            Map<String, Object> wrapped = new HashMap<>();
-            try {
-              api.setAnonymousIdentity();
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {
@@ -521,6 +521,9 @@ public class ZendeskPigeon {
         case (byte)128:         
           return ChatSDKV2InitializeRequest.fromMap((Map<String, Object>) readValue(buffer));
         
+        case (byte)129:         
+          return RegisterPushTokenRequest.fromMap((Map<String, Object>) readValue(buffer));
+        
         default:        
           return super.readValueOfType(type, buffer);
         
@@ -532,6 +535,10 @@ public class ZendeskPigeon {
         stream.write(128);
         writeValue(stream, ((ChatSDKV2InitializeRequest) value).toMap());
       } else 
+      if (value instanceof RegisterPushTokenRequest) {
+        stream.write(129);
+        writeValue(stream, ((RegisterPushTokenRequest) value).toMap());
+      } else 
 {
         super.writeValue(stream, value);
       }
@@ -541,6 +548,8 @@ public class ZendeskPigeon {
   /** Generated interface from Pigeon that represents a handler of messages from Flutter.*/
   public interface ChatSDKV2Api {
     void initializeChatSDK(@NonNull ChatSDKV2InitializeRequest request);
+    void registerPushToken(@NonNull RegisterPushTokenRequest request);
+    void startChat();
 
     /** The codec used by ChatSDKV2Api. */
     static MessageCodec<Object> getCodec() {
@@ -573,6 +582,49 @@ public class ZendeskPigeon {
           channel.setMessageHandler(null);
         }
       }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ChatSDKV2Api.registerPushToken", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              RegisterPushTokenRequest requestArg = (RegisterPushTokenRequest)args.get(0);
+              if (requestArg == null) {
+                throw new NullPointerException("requestArg unexpectedly null.");
+              }
+              api.registerPushToken(requestArg);
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ChatSDKV2Api.startChat", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              api.startChat();
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
     }
   }
   private static class ProfileProviderApiCodec extends StandardMessageCodec {
@@ -582,10 +634,10 @@ public class ZendeskPigeon {
     protected Object readValueOfType(byte type, ByteBuffer buffer) {
       switch (type) {
         case (byte)128:         
-          return SetVisitorInfoRequest.fromMap((Map<String, Object>) readValue(buffer));
+          return SetVisitorCustomInfoRequest.fromMap((Map<String, Object>) readValue(buffer));
         
         case (byte)129:         
-          return VisitorNoteRequest.fromMap((Map<String, Object>) readValue(buffer));
+          return SetVisitorIdentityRequest.fromMap((Map<String, Object>) readValue(buffer));
         
         case (byte)130:         
           return VisitorTagsRequest.fromMap((Map<String, Object>) readValue(buffer));
@@ -597,13 +649,13 @@ public class ZendeskPigeon {
     }
     @Override
     protected void writeValue(ByteArrayOutputStream stream, Object value)     {
-      if (value instanceof SetVisitorInfoRequest) {
+      if (value instanceof SetVisitorCustomInfoRequest) {
         stream.write(128);
-        writeValue(stream, ((SetVisitorInfoRequest) value).toMap());
+        writeValue(stream, ((SetVisitorCustomInfoRequest) value).toMap());
       } else 
-      if (value instanceof VisitorNoteRequest) {
+      if (value instanceof SetVisitorIdentityRequest) {
         stream.write(129);
-        writeValue(stream, ((VisitorNoteRequest) value).toMap());
+        writeValue(stream, ((SetVisitorIdentityRequest) value).toMap());
       } else 
       if (value instanceof VisitorTagsRequest) {
         stream.write(130);
@@ -617,12 +669,10 @@ public class ZendeskPigeon {
 
   /** Generated interface from Pigeon that represents a handler of messages from Flutter.*/
   public interface ProfileProviderApi {
-    void setVisitorInfo(@NonNull SetVisitorInfoRequest request);
+    void setVisitorIdentity(@NonNull SetVisitorIdentityRequest request);
     void addVisitorTags(@NonNull VisitorTagsRequest request);
     void removeVisitorTags(@NonNull VisitorTagsRequest request);
-    void setVisitorNote(@NonNull VisitorNoteRequest request);
-    void appendVisitorNote(@NonNull VisitorNoteRequest request);
-    void clearVisitorNotes();
+    void setVisitorCustomInfo(@NonNull SetVisitorCustomInfoRequest request);
     void clearVisitorInfo();
 
     /** The codec used by ProfileProviderApi. */
@@ -634,17 +684,17 @@ public class ZendeskPigeon {
     static void setup(BinaryMessenger binaryMessenger, ProfileProviderApi api) {
       {
         BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.setVisitorInfo", getCodec());
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.setVisitorIdentity", getCodec());
         if (api != null) {
           channel.setMessageHandler((message, reply) -> {
             Map<String, Object> wrapped = new HashMap<>();
             try {
               ArrayList<Object> args = (ArrayList<Object>)message;
-              SetVisitorInfoRequest requestArg = (SetVisitorInfoRequest)args.get(0);
+              SetVisitorIdentityRequest requestArg = (SetVisitorIdentityRequest)args.get(0);
               if (requestArg == null) {
                 throw new NullPointerException("requestArg unexpectedly null.");
               }
-              api.setVisitorInfo(requestArg);
+              api.setVisitorIdentity(requestArg);
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {
@@ -706,60 +756,17 @@ public class ZendeskPigeon {
       }
       {
         BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.setVisitorNote", getCodec());
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.setVisitorCustomInfo", getCodec());
         if (api != null) {
           channel.setMessageHandler((message, reply) -> {
             Map<String, Object> wrapped = new HashMap<>();
             try {
               ArrayList<Object> args = (ArrayList<Object>)message;
-              VisitorNoteRequest requestArg = (VisitorNoteRequest)args.get(0);
+              SetVisitorCustomInfoRequest requestArg = (SetVisitorCustomInfoRequest)args.get(0);
               if (requestArg == null) {
                 throw new NullPointerException("requestArg unexpectedly null.");
               }
-              api.setVisitorNote(requestArg);
-              wrapped.put("result", null);
-            }
-            catch (Error | RuntimeException exception) {
-              wrapped.put("error", wrapError(exception));
-            }
-            reply.reply(wrapped);
-          });
-        } else {
-          channel.setMessageHandler(null);
-        }
-      }
-      {
-        BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.appendVisitorNote", getCodec());
-        if (api != null) {
-          channel.setMessageHandler((message, reply) -> {
-            Map<String, Object> wrapped = new HashMap<>();
-            try {
-              ArrayList<Object> args = (ArrayList<Object>)message;
-              VisitorNoteRequest requestArg = (VisitorNoteRequest)args.get(0);
-              if (requestArg == null) {
-                throw new NullPointerException("requestArg unexpectedly null.");
-              }
-              api.appendVisitorNote(requestArg);
-              wrapped.put("result", null);
-            }
-            catch (Error | RuntimeException exception) {
-              wrapped.put("error", wrapError(exception));
-            }
-            reply.reply(wrapped);
-          });
-        } else {
-          channel.setMessageHandler(null);
-        }
-      }
-      {
-        BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.clearVisitorNotes", getCodec());
-        if (api != null) {
-          channel.setMessageHandler((message, reply) -> {
-            Map<String, Object> wrapped = new HashMap<>();
-            try {
-              api.clearVisitorNotes();
+              api.setVisitorCustomInfo(requestArg);
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {

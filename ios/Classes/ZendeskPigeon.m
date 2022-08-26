@@ -46,9 +46,14 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 + (nullable ChatSDKV2InitializeRequest *)nullableFromMap:(NSDictionary *)dict;
 - (NSDictionary *)toMap;
 @end
-@interface SetVisitorInfoRequest ()
-+ (SetVisitorInfoRequest *)fromMap:(NSDictionary *)dict;
-+ (nullable SetVisitorInfoRequest *)nullableFromMap:(NSDictionary *)dict;
+@interface RegisterPushTokenRequest ()
++ (RegisterPushTokenRequest *)fromMap:(NSDictionary *)dict;
++ (nullable RegisterPushTokenRequest *)nullableFromMap:(NSDictionary *)dict;
+- (NSDictionary *)toMap;
+@end
+@interface SetVisitorIdentityRequest ()
++ (SetVisitorIdentityRequest *)fromMap:(NSDictionary *)dict;
++ (nullable SetVisitorIdentityRequest *)nullableFromMap:(NSDictionary *)dict;
 - (NSDictionary *)toMap;
 @end
 @interface VisitorTagsRequest ()
@@ -56,9 +61,9 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 + (nullable VisitorTagsRequest *)nullableFromMap:(NSDictionary *)dict;
 - (NSDictionary *)toMap;
 @end
-@interface VisitorNoteRequest ()
-+ (VisitorNoteRequest *)fromMap:(NSDictionary *)dict;
-+ (nullable VisitorNoteRequest *)nullableFromMap:(NSDictionary *)dict;
+@interface SetVisitorCustomInfoRequest ()
++ (SetVisitorCustomInfoRequest *)fromMap:(NSDictionary *)dict;
++ (nullable SetVisitorCustomInfoRequest *)nullableFromMap:(NSDictionary *)dict;
 - (NSDictionary *)toMap;
 @end
 
@@ -114,12 +119,10 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 
 @implementation ChatSDKV2InitializeRequest
 + (instancetype)makeWithAccountKey:(NSString *)accountKey
-    appId:(NSString *)appId
-    pushToken:(NSString *)pushToken {
+    appId:(NSString *)appId {
   ChatSDKV2InitializeRequest* pigeonResult = [[ChatSDKV2InitializeRequest alloc] init];
   pigeonResult.accountKey = accountKey;
   pigeonResult.appId = appId;
-  pigeonResult.pushToken = pushToken;
   return pigeonResult;
 }
 + (ChatSDKV2InitializeRequest *)fromMap:(NSDictionary *)dict {
@@ -128,8 +131,6 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   NSAssert(pigeonResult.accountKey != nil, @"");
   pigeonResult.appId = GetNullableObject(dict, @"appId");
   NSAssert(pigeonResult.appId != nil, @"");
-  pigeonResult.pushToken = GetNullableObject(dict, @"pushToken");
-  NSAssert(pigeonResult.pushToken != nil, @"");
   return pigeonResult;
 }
 + (nullable ChatSDKV2InitializeRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [ChatSDKV2InitializeRequest fromMap:dict] : nil; }
@@ -137,29 +138,48 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   return @{
     @"accountKey" : (self.accountKey ?: [NSNull null]),
     @"appId" : (self.appId ?: [NSNull null]),
+  };
+}
+@end
+
+@implementation RegisterPushTokenRequest
++ (instancetype)makeWithPushToken:(NSString *)pushToken {
+  RegisterPushTokenRequest* pigeonResult = [[RegisterPushTokenRequest alloc] init];
+  pigeonResult.pushToken = pushToken;
+  return pigeonResult;
+}
++ (RegisterPushTokenRequest *)fromMap:(NSDictionary *)dict {
+  RegisterPushTokenRequest *pigeonResult = [[RegisterPushTokenRequest alloc] init];
+  pigeonResult.pushToken = GetNullableObject(dict, @"pushToken");
+  NSAssert(pigeonResult.pushToken != nil, @"");
+  return pigeonResult;
+}
++ (nullable RegisterPushTokenRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [RegisterPushTokenRequest fromMap:dict] : nil; }
+- (NSDictionary *)toMap {
+  return @{
     @"pushToken" : (self.pushToken ?: [NSNull null]),
   };
 }
 @end
 
-@implementation SetVisitorInfoRequest
+@implementation SetVisitorIdentityRequest
 + (instancetype)makeWithName:(nullable NSString *)name
     email:(nullable NSString *)email
     phoneNumber:(nullable NSString *)phoneNumber {
-  SetVisitorInfoRequest* pigeonResult = [[SetVisitorInfoRequest alloc] init];
+  SetVisitorIdentityRequest* pigeonResult = [[SetVisitorIdentityRequest alloc] init];
   pigeonResult.name = name;
   pigeonResult.email = email;
   pigeonResult.phoneNumber = phoneNumber;
   return pigeonResult;
 }
-+ (SetVisitorInfoRequest *)fromMap:(NSDictionary *)dict {
-  SetVisitorInfoRequest *pigeonResult = [[SetVisitorInfoRequest alloc] init];
++ (SetVisitorIdentityRequest *)fromMap:(NSDictionary *)dict {
+  SetVisitorIdentityRequest *pigeonResult = [[SetVisitorIdentityRequest alloc] init];
   pigeonResult.name = GetNullableObject(dict, @"name");
   pigeonResult.email = GetNullableObject(dict, @"email");
   pigeonResult.phoneNumber = GetNullableObject(dict, @"phoneNumber");
   return pigeonResult;
 }
-+ (nullable SetVisitorInfoRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [SetVisitorInfoRequest fromMap:dict] : nil; }
++ (nullable SetVisitorIdentityRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [SetVisitorIdentityRequest fromMap:dict] : nil; }
 - (NSDictionary *)toMap {
   return @{
     @"name" : (self.name ?: [NSNull null]),
@@ -189,22 +209,22 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 }
 @end
 
-@implementation VisitorNoteRequest
-+ (instancetype)makeWithNote:(NSString *)note {
-  VisitorNoteRequest* pigeonResult = [[VisitorNoteRequest alloc] init];
-  pigeonResult.note = note;
+@implementation SetVisitorCustomInfoRequest
++ (instancetype)makeWithCustomInfo:(NSString *)customInfo {
+  SetVisitorCustomInfoRequest* pigeonResult = [[SetVisitorCustomInfoRequest alloc] init];
+  pigeonResult.customInfo = customInfo;
   return pigeonResult;
 }
-+ (VisitorNoteRequest *)fromMap:(NSDictionary *)dict {
-  VisitorNoteRequest *pigeonResult = [[VisitorNoteRequest alloc] init];
-  pigeonResult.note = GetNullableObject(dict, @"note");
-  NSAssert(pigeonResult.note != nil, @"");
++ (SetVisitorCustomInfoRequest *)fromMap:(NSDictionary *)dict {
+  SetVisitorCustomInfoRequest *pigeonResult = [[SetVisitorCustomInfoRequest alloc] init];
+  pigeonResult.customInfo = GetNullableObject(dict, @"customInfo");
+  NSAssert(pigeonResult.customInfo != nil, @"");
   return pigeonResult;
 }
-+ (nullable VisitorNoteRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [VisitorNoteRequest fromMap:dict] : nil; }
++ (nullable SetVisitorCustomInfoRequest *)nullableFromMap:(NSDictionary *)dict { return (dict) ? [SetVisitorCustomInfoRequest fromMap:dict] : nil; }
 - (NSDictionary *)toMap {
   return @{
-    @"note" : (self.note ?: [NSNull null]),
+    @"customInfo" : (self.customInfo ?: [NSNull null]),
   };
 }
 @end
@@ -361,24 +381,6 @@ void SupportSDKApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Sup
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.SupportSDKApi.setAnonymousIdentity"
-        binaryMessenger:binaryMessenger
-        codec:SupportSDKApiGetCodec()        ];
-    if (api) {
-      NSCAssert([api respondsToSelector:@selector(setAnonymousIdentityWithError:)], @"SupportSDKApi api (%@) doesn't respond to @selector(setAnonymousIdentityWithError:)", api);
-      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        FlutterError *error;
-        [api setAnonymousIdentityWithError:&error];
-        callback(wrapResult(nil, error));
-      }];
-    }
-    else {
-      [channel setMessageHandler:nil];
-    }
-  }
-  {
-    FlutterBasicMessageChannel *channel =
-      [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.SupportSDKApi.showHelpCenter"
         binaryMessenger:binaryMessenger
         codec:SupportSDKApiGetCodec()        ];
@@ -404,6 +406,9 @@ void SupportSDKApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Sup
     case 128:     
       return [ChatSDKV2InitializeRequest fromMap:[self readValue]];
     
+    case 129:     
+      return [RegisterPushTokenRequest fromMap:[self readValue]];
+    
     default:    
       return [super readValueOfType:type];
     
@@ -418,6 +423,10 @@ void SupportSDKApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Sup
 {
   if ([value isKindOfClass:[ChatSDKV2InitializeRequest class]]) {
     [self writeByte:128];
+    [self writeValue:[value toMap]];
+  } else 
+  if ([value isKindOfClass:[RegisterPushTokenRequest class]]) {
+    [self writeByte:129];
     [self writeValue:[value toMap]];
   } else 
 {
@@ -469,6 +478,44 @@ void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Chat
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.ChatSDKV2Api.registerPushToken"
+        binaryMessenger:binaryMessenger
+        codec:ChatSDKV2ApiGetCodec()        ];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(registerPushTokenRequest:error:)], @"ChatSDKV2Api api (%@) doesn't respond to @selector(registerPushTokenRequest:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        RegisterPushTokenRequest *arg_request = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api registerPushTokenRequest:arg_request error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.ChatSDKV2Api.startChat"
+        binaryMessenger:binaryMessenger
+        codec:ChatSDKV2ApiGetCodec()        ];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(startChatWithError:)], @"ChatSDKV2Api api (%@) doesn't respond to @selector(startChatWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api startChatWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }
 @interface ProfileProviderApiCodecReader : FlutterStandardReader
 @end
@@ -477,10 +524,10 @@ void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Chat
 {
   switch (type) {
     case 128:     
-      return [SetVisitorInfoRequest fromMap:[self readValue]];
+      return [SetVisitorCustomInfoRequest fromMap:[self readValue]];
     
     case 129:     
-      return [VisitorNoteRequest fromMap:[self readValue]];
+      return [SetVisitorIdentityRequest fromMap:[self readValue]];
     
     case 130:     
       return [VisitorTagsRequest fromMap:[self readValue]];
@@ -497,11 +544,11 @@ void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Chat
 @implementation ProfileProviderApiCodecWriter
 - (void)writeValue:(id)value 
 {
-  if ([value isKindOfClass:[SetVisitorInfoRequest class]]) {
+  if ([value isKindOfClass:[SetVisitorCustomInfoRequest class]]) {
     [self writeByte:128];
     [self writeValue:[value toMap]];
   } else 
-  if ([value isKindOfClass:[VisitorNoteRequest class]]) {
+  if ([value isKindOfClass:[SetVisitorIdentityRequest class]]) {
     [self writeByte:129];
     [self writeValue:[value toMap]];
   } else 
@@ -541,16 +588,16 @@ void ProfileProviderApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObjec
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.setVisitorInfo"
+        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.setVisitorIdentity"
         binaryMessenger:binaryMessenger
         codec:ProfileProviderApiGetCodec()        ];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(setVisitorInfoRequest:error:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(setVisitorInfoRequest:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(setVisitorIdentityRequest:error:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(setVisitorIdentityRequest:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
-        SetVisitorInfoRequest *arg_request = GetNullableObjectAtIndex(args, 0);
+        SetVisitorIdentityRequest *arg_request = GetNullableObjectAtIndex(args, 0);
         FlutterError *error;
-        [api setVisitorInfoRequest:arg_request error:&error];
+        [api setVisitorIdentityRequest:arg_request error:&error];
         callback(wrapResult(nil, error));
       }];
     }
@@ -601,54 +648,16 @@ void ProfileProviderApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObjec
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.setVisitorNote"
+        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.setVisitorCustomInfo"
         binaryMessenger:binaryMessenger
         codec:ProfileProviderApiGetCodec()        ];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(setVisitorNoteRequest:error:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(setVisitorNoteRequest:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(setVisitorCustomInfoRequest:error:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(setVisitorCustomInfoRequest:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
-        VisitorNoteRequest *arg_request = GetNullableObjectAtIndex(args, 0);
+        SetVisitorCustomInfoRequest *arg_request = GetNullableObjectAtIndex(args, 0);
         FlutterError *error;
-        [api setVisitorNoteRequest:arg_request error:&error];
-        callback(wrapResult(nil, error));
-      }];
-    }
-    else {
-      [channel setMessageHandler:nil];
-    }
-  }
-  {
-    FlutterBasicMessageChannel *channel =
-      [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.appendVisitorNote"
-        binaryMessenger:binaryMessenger
-        codec:ProfileProviderApiGetCodec()        ];
-    if (api) {
-      NSCAssert([api respondsToSelector:@selector(appendVisitorNoteRequest:error:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(appendVisitorNoteRequest:error:)", api);
-      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        NSArray *args = message;
-        VisitorNoteRequest *arg_request = GetNullableObjectAtIndex(args, 0);
-        FlutterError *error;
-        [api appendVisitorNoteRequest:arg_request error:&error];
-        callback(wrapResult(nil, error));
-      }];
-    }
-    else {
-      [channel setMessageHandler:nil];
-    }
-  }
-  {
-    FlutterBasicMessageChannel *channel =
-      [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.clearVisitorNotes"
-        binaryMessenger:binaryMessenger
-        codec:ProfileProviderApiGetCodec()        ];
-    if (api) {
-      NSCAssert([api respondsToSelector:@selector(clearVisitorNotesWithError:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(clearVisitorNotesWithError:)", api);
-      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        FlutterError *error;
-        [api clearVisitorNotesWithError:&error];
+        [api setVisitorCustomInfoRequest:arg_request error:&error];
         callback(wrapResult(nil, error));
       }];
     }

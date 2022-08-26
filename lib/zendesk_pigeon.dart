@@ -61,18 +61,15 @@ class ChatSDKV2InitializeRequest {
   ChatSDKV2InitializeRequest({
     required this.accountKey,
     required this.appId,
-    required this.pushToken,
   });
 
   String accountKey;
   String appId;
-  String pushToken;
 
   Object encode() {
     final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
     pigeonMap['accountKey'] = accountKey;
     pigeonMap['appId'] = appId;
-    pigeonMap['pushToken'] = pushToken;
     return pigeonMap;
   }
 
@@ -81,13 +78,33 @@ class ChatSDKV2InitializeRequest {
     return ChatSDKV2InitializeRequest(
       accountKey: pigeonMap['accountKey']! as String,
       appId: pigeonMap['appId']! as String,
+    );
+  }
+}
+
+class RegisterPushTokenRequest {
+  RegisterPushTokenRequest({
+    required this.pushToken,
+  });
+
+  String pushToken;
+
+  Object encode() {
+    final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
+    pigeonMap['pushToken'] = pushToken;
+    return pigeonMap;
+  }
+
+  static RegisterPushTokenRequest decode(Object message) {
+    final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
+    return RegisterPushTokenRequest(
       pushToken: pigeonMap['pushToken']! as String,
     );
   }
 }
 
-class SetVisitorInfoRequest {
-  SetVisitorInfoRequest({
+class SetVisitorIdentityRequest {
+  SetVisitorIdentityRequest({
     this.name,
     this.email,
     this.phoneNumber,
@@ -105,9 +122,9 @@ class SetVisitorInfoRequest {
     return pigeonMap;
   }
 
-  static SetVisitorInfoRequest decode(Object message) {
+  static SetVisitorIdentityRequest decode(Object message) {
     final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
-    return SetVisitorInfoRequest(
+    return SetVisitorIdentityRequest(
       name: pigeonMap['name'] as String?,
       email: pigeonMap['email'] as String?,
       phoneNumber: pigeonMap['phoneNumber'] as String?,
@@ -136,23 +153,23 @@ class VisitorTagsRequest {
   }
 }
 
-class VisitorNoteRequest {
-  VisitorNoteRequest({
-    required this.note,
+class SetVisitorCustomInfoRequest {
+  SetVisitorCustomInfoRequest({
+    required this.customInfo,
   });
 
-  String note;
+  String customInfo;
 
   Object encode() {
     final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
-    pigeonMap['note'] = note;
+    pigeonMap['customInfo'] = customInfo;
     return pigeonMap;
   }
 
-  static VisitorNoteRequest decode(Object message) {
+  static SetVisitorCustomInfoRequest decode(Object message) {
     final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
-    return VisitorNoteRequest(
-      note: pigeonMap['note']! as String,
+    return SetVisitorCustomInfoRequest(
+      customInfo: pigeonMap['customInfo']! as String,
     );
   }
 }
@@ -164,20 +181,19 @@ class _ZendeskSDKApiCodec extends StandardMessageCodec {
     if (value is SetLoggableRequest) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else 
-{
+    } else {
       super.writeValue(buffer, value);
     }
   }
+
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128:       
+      case 128:
         return SetLoggableRequest.decode(readValue(buffer)!);
-      
-      default:      
+
+      default:
         return super.readValueOfType(type, buffer);
-      
     }
   }
 }
@@ -186,7 +202,8 @@ class ZendeskSDKApi {
   /// Constructor for [ZendeskSDKApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  ZendeskSDKApi({BinaryMessenger? binaryMessenger}) : _binaryMessenger = binaryMessenger;
+  ZendeskSDKApi({BinaryMessenger? binaryMessenger})
+      : _binaryMessenger = binaryMessenger;
 
   final BinaryMessenger? _binaryMessenger;
 
@@ -194,7 +211,8 @@ class ZendeskSDKApi {
 
   Future<void> setLoggable(SetLoggableRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ZendeskSDKApi.setLoggable', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ZendeskSDKApi.setLoggable', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -203,7 +221,8 @@ class ZendeskSDKApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -222,20 +241,19 @@ class _SupportSDKApiCodec extends StandardMessageCodec {
     if (value is SupportSDKInitializeRequest) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else 
-{
+    } else {
       super.writeValue(buffer, value);
     }
   }
+
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128:       
+      case 128:
         return SupportSDKInitializeRequest.decode(readValue(buffer)!);
-      
-      default:      
+
+      default:
         return super.readValueOfType(type, buffer);
-      
     }
   }
 }
@@ -244,15 +262,18 @@ class SupportSDKApi {
   /// Constructor for [SupportSDKApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  SupportSDKApi({BinaryMessenger? binaryMessenger}) : _binaryMessenger = binaryMessenger;
+  SupportSDKApi({BinaryMessenger? binaryMessenger})
+      : _binaryMessenger = binaryMessenger;
 
   final BinaryMessenger? _binaryMessenger;
 
   static const MessageCodec<Object?> codec = _SupportSDKApiCodec();
 
-  Future<void> initializeSupportSDK(SupportSDKInitializeRequest arg_request) async {
+  Future<void> initializeSupportSDK(
+      SupportSDKInitializeRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.SupportSDKApi.initializeSupportSDK', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.SupportSDKApi.initializeSupportSDK', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -261,29 +282,8 @@ class SupportSDKApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
-      throw PlatformException(
-        code: (error['code'] as String?)!,
-        message: error['message'] as String?,
-        details: error['details'],
-      );
-    } else {
-      return;
-    }
-  }
-
-  Future<void> setAnonymousIdentity() async {
-    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.SupportSDKApi.setAnonymousIdentity', codec, binaryMessenger: _binaryMessenger);
-    final Map<Object?, Object?>? replyMap =
-        await channel.send(null) as Map<Object?, Object?>?;
-    if (replyMap == null) {
-      throw PlatformException(
-        code: 'channel-error',
-        message: 'Unable to establish connection on channel.',
-      );
-    } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -296,7 +296,8 @@ class SupportSDKApi {
 
   Future<void> showHelpCenter() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.SupportSDKApi.showHelpCenter', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.SupportSDKApi.showHelpCenter', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(null) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -305,7 +306,8 @@ class SupportSDKApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -324,20 +326,25 @@ class _ChatSDKV2ApiCodec extends StandardMessageCodec {
     if (value is ChatSDKV2InitializeRequest) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else 
-{
+    } else if (value is RegisterPushTokenRequest) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.encode());
+    } else {
       super.writeValue(buffer, value);
     }
   }
+
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128:       
+      case 128:
         return ChatSDKV2InitializeRequest.decode(readValue(buffer)!);
-      
-      default:      
+
+      case 129:
+        return RegisterPushTokenRequest.decode(readValue(buffer)!);
+
+      default:
         return super.readValueOfType(type, buffer);
-      
     }
   }
 }
@@ -346,7 +353,8 @@ class ChatSDKV2Api {
   /// Constructor for [ChatSDKV2Api].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  ChatSDKV2Api({BinaryMessenger? binaryMessenger}) : _binaryMessenger = binaryMessenger;
+  ChatSDKV2Api({BinaryMessenger? binaryMessenger})
+      : _binaryMessenger = binaryMessenger;
 
   final BinaryMessenger? _binaryMessenger;
 
@@ -354,7 +362,8 @@ class ChatSDKV2Api {
 
   Future<void> initializeChatSDK(ChatSDKV2InitializeRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ChatSDKV2Api.initializeChatSDK', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ChatSDKV2Api.initializeChatSDK', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -363,7 +372,56 @@ class ChatSDKV2Api {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
+      throw PlatformException(
+        code: (error['code'] as String?)!,
+        message: error['message'] as String?,
+        details: error['details'],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> registerPushToken(RegisterPushTokenRequest arg_request) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.ChatSDKV2Api.registerPushToken', codec,
+        binaryMessenger: _binaryMessenger);
+    final Map<Object?, Object?>? replyMap =
+        await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
+    if (replyMap == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyMap['error'] != null) {
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
+      throw PlatformException(
+        code: (error['code'] as String?)!,
+        message: error['message'] as String?,
+        details: error['details'],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> startChat() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.ChatSDKV2Api.startChat', codec,
+        binaryMessenger: _binaryMessenger);
+    final Map<Object?, Object?>? replyMap =
+        await channel.send(null) as Map<Object?, Object?>?;
+    if (replyMap == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyMap['error'] != null) {
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -379,37 +437,34 @@ class _ProfileProviderApiCodec extends StandardMessageCodec {
   const _ProfileProviderApiCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is SetVisitorInfoRequest) {
+    if (value is SetVisitorCustomInfoRequest) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else 
-    if (value is VisitorNoteRequest) {
+    } else if (value is SetVisitorIdentityRequest) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else 
-    if (value is VisitorTagsRequest) {
+    } else if (value is VisitorTagsRequest) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else 
-{
+    } else {
       super.writeValue(buffer, value);
     }
   }
+
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128:       
-        return SetVisitorInfoRequest.decode(readValue(buffer)!);
-      
-      case 129:       
-        return VisitorNoteRequest.decode(readValue(buffer)!);
-      
-      case 130:       
+      case 128:
+        return SetVisitorCustomInfoRequest.decode(readValue(buffer)!);
+
+      case 129:
+        return SetVisitorIdentityRequest.decode(readValue(buffer)!);
+
+      case 130:
         return VisitorTagsRequest.decode(readValue(buffer)!);
-      
-      default:      
+
+      default:
         return super.readValueOfType(type, buffer);
-      
     }
   }
 }
@@ -418,15 +473,17 @@ class ProfileProviderApi {
   /// Constructor for [ProfileProviderApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  ProfileProviderApi({BinaryMessenger? binaryMessenger}) : _binaryMessenger = binaryMessenger;
+  ProfileProviderApi({BinaryMessenger? binaryMessenger})
+      : _binaryMessenger = binaryMessenger;
 
   final BinaryMessenger? _binaryMessenger;
 
   static const MessageCodec<Object?> codec = _ProfileProviderApiCodec();
 
-  Future<void> setVisitorInfo(SetVisitorInfoRequest arg_request) async {
+  Future<void> setVisitorIdentity(SetVisitorIdentityRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.setVisitorInfo', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ProfileProviderApi.setVisitorIdentity', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -435,7 +492,8 @@ class ProfileProviderApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -448,7 +506,8 @@ class ProfileProviderApi {
 
   Future<void> addVisitorTags(VisitorTagsRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.addVisitorTags', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ProfileProviderApi.addVisitorTags', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -457,7 +516,8 @@ class ProfileProviderApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -470,7 +530,8 @@ class ProfileProviderApi {
 
   Future<void> removeVisitorTags(VisitorTagsRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.removeVisitorTags', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ProfileProviderApi.removeVisitorTags', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -479,7 +540,8 @@ class ProfileProviderApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -490,9 +552,11 @@ class ProfileProviderApi {
     }
   }
 
-  Future<void> setVisitorNote(VisitorNoteRequest arg_request) async {
+  Future<void> setVisitorCustomInfo(
+      SetVisitorCustomInfoRequest arg_request) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.setVisitorNote', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ProfileProviderApi.setVisitorCustomInfo', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -501,51 +565,8 @@ class ProfileProviderApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
-      throw PlatformException(
-        code: (error['code'] as String?)!,
-        message: error['message'] as String?,
-        details: error['details'],
-      );
-    } else {
-      return;
-    }
-  }
-
-  Future<void> appendVisitorNote(VisitorNoteRequest arg_request) async {
-    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.appendVisitorNote', codec, binaryMessenger: _binaryMessenger);
-    final Map<Object?, Object?>? replyMap =
-        await channel.send(<Object?>[arg_request]) as Map<Object?, Object?>?;
-    if (replyMap == null) {
-      throw PlatformException(
-        code: 'channel-error',
-        message: 'Unable to establish connection on channel.',
-      );
-    } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
-      throw PlatformException(
-        code: (error['code'] as String?)!,
-        message: error['message'] as String?,
-        details: error['details'],
-      );
-    } else {
-      return;
-    }
-  }
-
-  Future<void> clearVisitorNotes() async {
-    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.clearVisitorNotes', codec, binaryMessenger: _binaryMessenger);
-    final Map<Object?, Object?>? replyMap =
-        await channel.send(null) as Map<Object?, Object?>?;
-    if (replyMap == null) {
-      throw PlatformException(
-        code: 'channel-error',
-        message: 'Unable to establish connection on channel.',
-      );
-    } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,
@@ -558,7 +579,8 @@ class ProfileProviderApi {
 
   Future<void> clearVisitorInfo() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo', codec, binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo', codec,
+        binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
         await channel.send(null) as Map<Object?, Object?>?;
     if (replyMap == null) {
@@ -567,7 +589,8 @@ class ProfileProviderApi {
         message: 'Unable to establish connection on channel.',
       );
     } else if (replyMap['error'] != null) {
-      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      final Map<Object?, Object?> error =
+          (replyMap['error'] as Map<Object?, Object?>?)!;
       throw PlatformException(
         code: (error['code'] as String?)!,
         message: error['message'] as String?,

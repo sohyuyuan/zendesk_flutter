@@ -54,40 +54,54 @@ struct SupportSDKInitializeRequest {
 struct ChatSDKV2InitializeRequest {
   var accountKey: String
   var appId: String
-  var pushToken: String
 
   static func fromMap(_ map: [String: Any?]) -> ChatSDKV2InitializeRequest? {
     let accountKey = map["accountKey"] as! String
     let appId = map["appId"] as! String
-    let pushToken = map["pushToken"] as! String
 
     return ChatSDKV2InitializeRequest(
       accountKey: accountKey,
-      appId: appId,
-      pushToken: pushToken
+      appId: appId
     )
   }
   func toMap() -> [String: Any?] {
     return [
       "accountKey": accountKey,
-      "appId": appId,
+      "appId": appId
+    ]
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct RegisterPushTokenRequest {
+  var pushToken: String
+
+  static func fromMap(_ map: [String: Any?]) -> RegisterPushTokenRequest? {
+    let pushToken = map["pushToken"] as! String
+
+    return RegisterPushTokenRequest(
+      pushToken: pushToken
+    )
+  }
+  func toMap() -> [String: Any?] {
+    return [
       "pushToken": pushToken
     ]
   }
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
-struct SetVisitorInfoRequest {
+struct SetVisitorIdentityRequest {
   var name: String? = nil
   var email: String? = nil
   var phoneNumber: String? = nil
 
-  static func fromMap(_ map: [String: Any?]) -> SetVisitorInfoRequest? {
+  static func fromMap(_ map: [String: Any?]) -> SetVisitorIdentityRequest? {
     let name = map["name"] as? String 
     let email = map["email"] as? String 
     let phoneNumber = map["phoneNumber"] as? String 
 
-    return SetVisitorInfoRequest(
+    return SetVisitorIdentityRequest(
       name: name,
       email: email,
       phoneNumber: phoneNumber
@@ -121,19 +135,19 @@ struct VisitorTagsRequest {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
-struct VisitorNoteRequest {
-  var note: String
+struct SetVisitorCustomInfoRequest {
+  var customInfo: String
 
-  static func fromMap(_ map: [String: Any?]) -> VisitorNoteRequest? {
-    let note = map["note"] as! String
+  static func fromMap(_ map: [String: Any?]) -> SetVisitorCustomInfoRequest? {
+    let customInfo = map["customInfo"] as! String
 
-    return VisitorNoteRequest(
-      note: note
+    return SetVisitorCustomInfoRequest(
+      customInfo: customInfo
     )
   }
   func toMap() -> [String: Any?] {
     return [
-      "note": note
+      "customInfo": customInfo
     ]
   }
 }
@@ -236,7 +250,6 @@ class SupportSDKApiCodec: FlutterStandardMessageCodec {
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol SupportSDKApi {
   func initializeSupportSDK(request: SupportSDKInitializeRequest)
-  func setAnonymousIdentity()
   func showHelpCenter()
 }
 
@@ -257,15 +270,6 @@ class SupportSDKApiSetup {
     } else {
       initializeSupportSDKChannel.setMessageHandler(nil)
     }
-    let setAnonymousIdentityChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.SupportSDKApi.setAnonymousIdentity", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      setAnonymousIdentityChannel.setMessageHandler { _, reply in
-        api.setAnonymousIdentity()
-        reply(nil)
-      }
-    } else {
-      setAnonymousIdentityChannel.setMessageHandler(nil)
-    }
     let showHelpCenterChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.SupportSDKApi.showHelpCenter", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       showHelpCenterChannel.setMessageHandler { _, reply in
@@ -282,6 +286,8 @@ private class ChatSDKV2ApiCodecReader: FlutterStandardReader {
     switch type {
       case 128:
         return ChatSDKV2InitializeRequest.fromMap(self.readValue() as! [String: Any])      
+      case 129:
+        return RegisterPushTokenRequest.fromMap(self.readValue() as! [String: Any])      
       default:
         return super.readValue(ofType: type)
       
@@ -292,6 +298,9 @@ private class ChatSDKV2ApiCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
     if let value = value as? ChatSDKV2InitializeRequest {
       super.writeByte(128)
+      super.writeValue(value.toMap())
+    } else if let value = value as? RegisterPushTokenRequest {
+      super.writeByte(129)
       super.writeValue(value.toMap())
     } else {
       super.writeValue(value)
@@ -316,6 +325,8 @@ class ChatSDKV2ApiCodec: FlutterStandardMessageCodec {
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol ChatSDKV2Api {
   func initializeChatSDK(request: ChatSDKV2InitializeRequest)
+  func registerPushToken(request: RegisterPushTokenRequest)
+  func startChat()
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -335,15 +346,35 @@ class ChatSDKV2ApiSetup {
     } else {
       initializeChatSDKChannel.setMessageHandler(nil)
     }
+    let registerPushTokenChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ChatSDKV2Api.registerPushToken", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      registerPushTokenChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! RegisterPushTokenRequest
+        api.registerPushToken(request: requestArg)
+        reply(nil)
+      }
+    } else {
+      registerPushTokenChannel.setMessageHandler(nil)
+    }
+    let startChatChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ChatSDKV2Api.startChat", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      startChatChannel.setMessageHandler { _, reply in
+        api.startChat()
+        reply(nil)
+      }
+    } else {
+      startChatChannel.setMessageHandler(nil)
+    }
   }
 }
 private class ProfileProviderApiCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
       case 128:
-        return SetVisitorInfoRequest.fromMap(self.readValue() as! [String: Any])      
+        return SetVisitorCustomInfoRequest.fromMap(self.readValue() as! [String: Any])      
       case 129:
-        return VisitorNoteRequest.fromMap(self.readValue() as! [String: Any])      
+        return SetVisitorIdentityRequest.fromMap(self.readValue() as! [String: Any])      
       case 130:
         return VisitorTagsRequest.fromMap(self.readValue() as! [String: Any])      
       default:
@@ -354,10 +385,10 @@ private class ProfileProviderApiCodecReader: FlutterStandardReader {
 }
 private class ProfileProviderApiCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? SetVisitorInfoRequest {
+    if let value = value as? SetVisitorCustomInfoRequest {
       super.writeByte(128)
       super.writeValue(value.toMap())
-    } else if let value = value as? VisitorNoteRequest {
+    } else if let value = value as? SetVisitorIdentityRequest {
       super.writeByte(129)
       super.writeValue(value.toMap())
     } else if let value = value as? VisitorTagsRequest {
@@ -385,12 +416,10 @@ class ProfileProviderApiCodec: FlutterStandardMessageCodec {
 
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol ProfileProviderApi {
-  func setVisitorInfo(request: SetVisitorInfoRequest)
+  func setVisitorIdentity(request: SetVisitorIdentityRequest)
   func addVisitorTags(request: VisitorTagsRequest)
   func removeVisitorTags(request: VisitorTagsRequest)
-  func setVisitorNote(request: VisitorNoteRequest)
-  func appendVisitorNote(request: VisitorNoteRequest)
-  func clearVisitorNotes()
+  func setVisitorCustomInfo(request: SetVisitorCustomInfoRequest)
   func clearVisitorInfo()
 }
 
@@ -400,16 +429,16 @@ class ProfileProviderApiSetup {
   static var codec: FlutterStandardMessageCodec { ProfileProviderApiCodec.shared }
   /// Sets up an instance of `ProfileProviderApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: ProfileProviderApi?) {
-    let setVisitorInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.setVisitorInfo", binaryMessenger: binaryMessenger, codec: codec)
+    let setVisitorIdentityChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.setVisitorIdentity", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      setVisitorInfoChannel.setMessageHandler { message, reply in
+      setVisitorIdentityChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let requestArg = args[0] as! SetVisitorInfoRequest
-        api.setVisitorInfo(request: requestArg)
+        let requestArg = args[0] as! SetVisitorIdentityRequest
+        api.setVisitorIdentity(request: requestArg)
         reply(nil)
       }
     } else {
-      setVisitorInfoChannel.setMessageHandler(nil)
+      setVisitorIdentityChannel.setMessageHandler(nil)
     }
     let addVisitorTagsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.addVisitorTags", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
@@ -433,36 +462,16 @@ class ProfileProviderApiSetup {
     } else {
       removeVisitorTagsChannel.setMessageHandler(nil)
     }
-    let setVisitorNoteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.setVisitorNote", binaryMessenger: binaryMessenger, codec: codec)
+    let setVisitorCustomInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.setVisitorCustomInfo", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      setVisitorNoteChannel.setMessageHandler { message, reply in
+      setVisitorCustomInfoChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let requestArg = args[0] as! VisitorNoteRequest
-        api.setVisitorNote(request: requestArg)
+        let requestArg = args[0] as! SetVisitorCustomInfoRequest
+        api.setVisitorCustomInfo(request: requestArg)
         reply(nil)
       }
     } else {
-      setVisitorNoteChannel.setMessageHandler(nil)
-    }
-    let appendVisitorNoteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.appendVisitorNote", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      appendVisitorNoteChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let requestArg = args[0] as! VisitorNoteRequest
-        api.appendVisitorNote(request: requestArg)
-        reply(nil)
-      }
-    } else {
-      appendVisitorNoteChannel.setMessageHandler(nil)
-    }
-    let clearVisitorNotesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.clearVisitorNotes", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      clearVisitorNotesChannel.setMessageHandler { _, reply in
-        api.clearVisitorNotes()
-        reply(nil)
-      }
-    } else {
-      clearVisitorNotesChannel.setMessageHandler(nil)
+      setVisitorCustomInfoChannel.setMessageHandler(nil)
     }
     let clearVisitorInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
