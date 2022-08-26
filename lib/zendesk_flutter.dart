@@ -21,9 +21,7 @@ class ZendeskFlutter {
     required ChatSDKV2InitializeRequest chatSDKV2InitializeRequest,
   }) async {
     await _zendeskSDKApi.setLoggable(setLoggableRequest);
-
     await _supportSDKApi.initializeSupportSDK(supportSDKInitializeRequest);
-
     await _chatSDKV2Api.initializeChatSDK(chatSDKV2InitializeRequest);
   }
 
@@ -37,6 +35,18 @@ class ZendeskFlutter {
     await _chatSDKV2Api.startChat();
   }
 
+  /// Reference: [Chat SDK V2 Push Notifications](https://developer.zendesk.com/documentation/classic-web-widget-sdks/chat-sdk-v2/android/push_notifications/)
+  Future<void> registerPushTokenAsync({
+    required RegisterPushTokenRequest registerPushTokenRequest,
+  }) async {
+    await _chatSDKV2Api.registerPushToken(registerPushTokenRequest);
+  }
+
+  /// Reference: [Chat SDK V2 Push Notifications](https://developer.zendesk.com/documentation/classic-web-widget-sdks/chat-sdk-v2/android/push_notifications/)
+  Future<void> unregisterPushTokenAsync() async {
+    await _chatSDKV2Api.unregisterPushToken();
+  }
+
   /// {@template ProfileProviderInterface}
   /// Reference: [ProfileProvider Interface](https://zendesk.github.io/mobile_sdk_javadocs/chatv2/v336/zendesk/chat/ProfileProvider.html).
   /// {@endtemplate}
@@ -46,9 +56,9 @@ class ZendeskFlutter {
     await _profileProviderApi.setVisitorIdentity(setVisitorInfoRequest);
   }
 
-  /// Reference: [Reset Identity](https://zendesk.github.io/mobile_sdk_javadocs/chatv2/v336/zendesk/chat/Chat.html#resetIdentity--).
-  Future<void> clearVisitorInfo() async {
-    await _profileProviderApi.clearVisitorInfo();
+  /// Clear visitor identity.
+  Future<void> clearVisitorIdentityAsync() async {
+    await _profileProviderApi.clearVisitorIdentity();
   }
 
   /// Set visitor custom information.

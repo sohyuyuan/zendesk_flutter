@@ -549,6 +549,7 @@ public class ZendeskPigeon {
   public interface ChatSDKV2Api {
     void initializeChatSDK(@NonNull ChatSDKV2InitializeRequest request);
     void registerPushToken(@NonNull RegisterPushTokenRequest request);
+    void unregisterPushToken();
     void startChat();
 
     /** The codec used by ChatSDKV2Api. */
@@ -595,6 +596,25 @@ public class ZendeskPigeon {
                 throw new NullPointerException("requestArg unexpectedly null.");
               }
               api.registerPushToken(requestArg);
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ChatSDKV2Api.unregisterPushToken", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              api.unregisterPushToken();
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {
@@ -673,7 +693,7 @@ public class ZendeskPigeon {
     void addVisitorTags(@NonNull VisitorTagsRequest request);
     void removeVisitorTags(@NonNull VisitorTagsRequest request);
     void setVisitorCustomInfo(@NonNull SetVisitorCustomInfoRequest request);
-    void clearVisitorInfo();
+    void clearVisitorIdentity();
 
     /** The codec used by ProfileProviderApi. */
     static MessageCodec<Object> getCodec() {
@@ -780,12 +800,12 @@ public class ZendeskPigeon {
       }
       {
         BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo", getCodec());
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.ProfileProviderApi.clearVisitorIdentity", getCodec());
         if (api != null) {
           channel.setMessageHandler((message, reply) -> {
             Map<String, Object> wrapped = new HashMap<>();
             try {
-              api.clearVisitorInfo();
+              api.clearVisitorIdentity();
               wrapped.put("result", null);
             }
             catch (Error | RuntimeException exception) {

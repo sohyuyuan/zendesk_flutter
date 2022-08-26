@@ -80,6 +80,9 @@ abstract class ChatSDKV2Api {
   /// Reference: [Chat SDK V2 Push Notifications](https://developer.zendesk.com/documentation/classic-web-widget-sdks/chat-sdk-v2/android/push_notifications/)
   void registerPushToken(RegisterPushTokenRequest request);
 
+  /// Reference: [Chat SDK V2 Push Notifications](https://developer.zendesk.com/documentation/classic-web-widget-sdks/chat-sdk-v2/android/push_notifications/)
+  void unregisterPushToken();
+
   /// Reference: [Running the Chat engine](https://developer.zendesk.com/documentation/classic-web-widget-sdks/unified-sdk/android/chat_engine/).
   void startChat();
 }
@@ -129,6 +132,6 @@ abstract class ProfileProviderApi {
   void setVisitorCustomInfo(SetVisitorCustomInfoRequest request);
 
   /// Reference: [Reset Identity](https://zendesk.github.io/mobile_sdk_javadocs/chatv2/v336/zendesk/chat/Chat.html#resetIdentity--).
-  void clearVisitorInfo();
+  void clearVisitorIdentity();
 }
 //#endregion

@@ -18,27 +18,31 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _zendeskFlutterPlugin = ZendeskFlutter();
-  bool _visitorInfoIsSet = false;
-  bool _visitorNoteIsSet = false;
+  bool _visitorIdentityIsSet = false;
+  bool _visitorCustomInfoIsSet = false;
   bool _visitorTagsIsSet = false;
+  bool _pushTokenIsSet = false;
 
   // Support SDK initialization inputs
   // Refer to https://developer.zendesk.com/documentation/classic-web-widget-sdks/support-sdk/android/sdk_initialize/
-  static const _zendeskUrl = "https://yuyuansoh.zendesk.com";
-  static const _appId = "2f3edb8f5c1a7d5bf2d9e1cb9860aba7a7761453e9b35864";
-  static const _clientId = "mobile_sdk_client_3dd9aee7ebf541674329";
+  static const _zendeskUrl = "";
+  static const _appId = "";
+  static const _clientId = "";
 
   // Chat SDK initialization inputs
   // Refer to https://developer.zendesk.com/documentation/classic-web-widget-sdks/chat-sdk-v2/android/push_notifications/
-  static const _chatSDKAppId = "481677492641865729";
-  static const _chatSDKAccountKey = "4sMTIPpdhDgRAiJ1qqUOgNY0RRqwxEkJ";
+  static const _chatSDKAppId = "";
+  static const _chatSDKAccountKey = "";
+
+  // Push notification input
+  static const _pushToken = "YourPushToken";
 
   // Mock datum
-  static const _name = "tester333";
-  static const _email = "tester333@abc.abc";
-  static const _phone = "333123333";
+  static const _name = "tester";
+  static const _email = "tester@abc.abc";
+  static const _phone = "123456";
   static const _userType = "VIP";
-  static const _userCompany = "test333 Corp.";
+  static const _userCompany = "test1 Corp.";
 
   static const _tagsToAdd = [
     "Test Tag v1.1.1",
@@ -65,53 +69,81 @@ class _MyAppState extends State<MyApp> {
           child: Center(
             child: Column(
               children: [
+                // Show Helper Center
+
                 ElevatedButton(
                   onPressed: _showHelpCenterAsync,
                   child: const Text('Show help center'),
                 ),
+                // Start Chat
+
                 ElevatedButton(
                   onPressed: _startChatAsync,
-                  child: const Text('Chat SDK'),
+                  child: const Text('Start Chat'),
                 ),
+                // Set Visitor Identity
+
                 ElevatedButton(
                   onPressed: () {
-                    _setVisitorInfoAsync(
+                    _setVisitorIdentityAsync(
                       request: SetVisitorIdentityRequest(
                         name: _name,
                         email: _email,
                         phoneNumber: _phone,
                       ),
                     ).then((value) {
-                      _visitorInfoIsSet = true;
+                      _visitorIdentityIsSet = true;
                       if (mounted) setState(() {});
                     });
                   },
-                  child: const Text('Set Visitor Info'),
+                  child: const Text('Set Visitor Identity'),
                 ),
-                const Text('Visitor Info is set?'),
-                Text(_visitorInfoIsSet.toString()),
+                const Text('Visitor Identity is set?'),
+                Text(_visitorIdentityIsSet.toString()),
+                // Clear Visitor Identity
+
                 ElevatedButton(
                   onPressed: () {
-                    final sb = StringBuffer();
-                    sb.writeln("(This is an auto generated info.)");
-                    sb.writeln("Name: $_name");
-                    sb.writeln("Email: $_email");
-                    sb.writeln("Phone: $_phone");
-                    sb.writeln("Company: $_userCompany");
-                    sb.writeln("Type: $_userType");
-                    _setVisitorCustomInfoAsync(
-                      request: SetVisitorCustomInfoRequest(
-                        customInfo: sb.toString(),
-                      ),
-                    ).then((value) {
-                      _visitorNoteIsSet = true;
+                    _clearVisitorIdentityAsync().then((value) {
+                      _visitorIdentityIsSet = false;
+                      _visitorCustomInfoIsSet = false;
+                      _visitorTagsIsSet = false;
                       if (mounted) setState(() {});
                     });
                   },
-                  child: const Text('Set Visitor Note'),
+                  child: const Text('Clear Visitor Identity'),
                 ),
-                const Text('User note is set?'),
-                Text(_visitorNoteIsSet.toString()),
+                // Set Visitor Custom Info
+
+                ElevatedButton(
+                  onPressed: !_visitorIdentityIsSet
+                      ? null
+                      : () {
+                          final sb = StringBuffer();
+                          sb.writeln("(This is an auto generated info.)");
+                          sb.writeln("Name: $_name");
+                          sb.writeln("Email: $_email");
+                          sb.writeln("Phone: $_phone");
+                          sb.writeln("Company: $_userCompany");
+                          sb.writeln("Type: $_userType");
+                          _setVisitorCustomInfoAsync(
+                            request: SetVisitorCustomInfoRequest(
+                              customInfo: sb.toString(),
+                            ),
+                          ).then((value) {
+                            _visitorCustomInfoIsSet = true;
+                            if (mounted) setState(() {});
+                          });
+                        },
+                  child: const Text('Set Visitor Custom Info'),
+                ),
+                !_visitorIdentityIsSet
+                    ? const Text("Set visitor identity to activate button.")
+                    : const SizedBox.shrink(),
+                const Text('User custom info is set?'),
+                Text(_visitorCustomInfoIsSet.toString()),
+                // Set Visitor Tags
+
                 ElevatedButton(
                   onPressed: () {
                     _addVisitorTagsAsync(
@@ -125,6 +157,34 @@ class _MyAppState extends State<MyApp> {
                 ),
                 const Text('Visitor tags is set?'),
                 Text(_visitorTagsIsSet.toString()),
+                // Register Push Token
+
+                ElevatedButton(
+                  onPressed: () {
+                    _registerPushTokenAsync(
+                      request: RegisterPushTokenRequest(
+                        pushToken: _pushToken,
+                      ),
+                    ).then((value) {
+                      _pushTokenIsSet = true;
+                      if (mounted) setState(() {});
+                    });
+                  },
+                  child: const Text('Register Push Token'),
+                ),
+                const Text('Push token is set?'),
+                Text(_pushTokenIsSet.toString()),
+                // Unregister Push Token
+
+                ElevatedButton(
+                  onPressed: () {
+                    _unregisterPushTokenAsync().then((value) {
+                      _pushTokenIsSet = false;
+                      if (mounted) setState(() {});
+                    });
+                  },
+                  child: const Text('Unregister Push Token'),
+                ),
               ],
             ),
           ),
@@ -168,13 +228,21 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _setVisitorInfoAsync({
+  Future<void> _setVisitorIdentityAsync({
     required SetVisitorIdentityRequest request,
   }) async {
     try {
       await _zendeskFlutterPlugin.setVisitorIdentityAsync(
         setVisitorInfoRequest: request,
       );
+    } catch (ex, stackTrace) {
+      Logger.root.severe(ex, stackTrace);
+    }
+  }
+
+  Future<void> _clearVisitorIdentityAsync() async {
+    try {
+      await _zendeskFlutterPlugin.clearVisitorIdentityAsync();
     } catch (ex, stackTrace) {
       Logger.root.severe(ex, stackTrace);
     }
@@ -205,6 +273,26 @@ class _MyAppState extends State<MyApp> {
           tags: _tagsToRemove,
         ),
       );
+    } catch (ex, stackTrace) {
+      Logger.root.severe(ex, stackTrace);
+    }
+  }
+
+  Future<void> _registerPushTokenAsync({
+    required RegisterPushTokenRequest request,
+  }) async {
+    try {
+      await _zendeskFlutterPlugin.registerPushTokenAsync(
+        registerPushTokenRequest: request,
+      );
+    } catch (ex, stackTrace) {
+      Logger.root.severe(ex, stackTrace);
+    }
+  }
+
+  Future<void> _unregisterPushTokenAsync() async {
+    try {
+      await _zendeskFlutterPlugin.unregisterPushTokenAsync();
     } catch (ex, stackTrace) {
       Logger.root.severe(ex, stackTrace);
     }

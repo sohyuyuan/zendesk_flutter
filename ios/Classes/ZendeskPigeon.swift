@@ -326,6 +326,7 @@ class ChatSDKV2ApiCodec: FlutterStandardMessageCodec {
 protocol ChatSDKV2Api {
   func initializeChatSDK(request: ChatSDKV2InitializeRequest)
   func registerPushToken(request: RegisterPushTokenRequest)
+  func unregisterPushToken()
   func startChat()
 }
 
@@ -356,6 +357,15 @@ class ChatSDKV2ApiSetup {
       }
     } else {
       registerPushTokenChannel.setMessageHandler(nil)
+    }
+    let unregisterPushTokenChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ChatSDKV2Api.unregisterPushToken", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      unregisterPushTokenChannel.setMessageHandler { _, reply in
+        api.unregisterPushToken()
+        reply(nil)
+      }
+    } else {
+      unregisterPushTokenChannel.setMessageHandler(nil)
     }
     let startChatChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ChatSDKV2Api.startChat", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
@@ -420,7 +430,7 @@ protocol ProfileProviderApi {
   func addVisitorTags(request: VisitorTagsRequest)
   func removeVisitorTags(request: VisitorTagsRequest)
   func setVisitorCustomInfo(request: SetVisitorCustomInfoRequest)
-  func clearVisitorInfo()
+  func clearVisitorIdentity()
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -473,14 +483,14 @@ class ProfileProviderApiSetup {
     } else {
       setVisitorCustomInfoChannel.setMessageHandler(nil)
     }
-    let clearVisitorInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo", binaryMessenger: binaryMessenger, codec: codec)
+    let clearVisitorIdentityChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.ProfileProviderApi.clearVisitorIdentity", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      clearVisitorInfoChannel.setMessageHandler { _, reply in
-        api.clearVisitorInfo()
+      clearVisitorIdentityChannel.setMessageHandler { _, reply in
+        api.clearVisitorIdentity()
         reply(nil)
       }
     } else {
-      clearVisitorInfoChannel.setMessageHandler(nil)
+      clearVisitorIdentityChannel.setMessageHandler(nil)
     }
   }
 }

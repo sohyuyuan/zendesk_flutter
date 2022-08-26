@@ -501,6 +501,24 @@ void ChatSDKV2ApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Chat
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.ChatSDKV2Api.unregisterPushToken"
+        binaryMessenger:binaryMessenger
+        codec:ChatSDKV2ApiGetCodec()        ];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(unregisterPushTokenWithError:)], @"ChatSDKV2Api api (%@) doesn't respond to @selector(unregisterPushTokenWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api unregisterPushTokenWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.ChatSDKV2Api.startChat"
         binaryMessenger:binaryMessenger
         codec:ChatSDKV2ApiGetCodec()        ];
@@ -668,14 +686,14 @@ void ProfileProviderApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObjec
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
-        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.clearVisitorInfo"
+        initWithName:@"dev.flutter.pigeon.ProfileProviderApi.clearVisitorIdentity"
         binaryMessenger:binaryMessenger
         codec:ProfileProviderApiGetCodec()        ];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(clearVisitorInfoWithError:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(clearVisitorInfoWithError:)", api);
+      NSCAssert([api respondsToSelector:@selector(clearVisitorIdentityWithError:)], @"ProfileProviderApi api (%@) doesn't respond to @selector(clearVisitorIdentityWithError:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         FlutterError *error;
-        [api clearVisitorInfoWithError:&error];
+        [api clearVisitorIdentityWithError:&error];
         callback(wrapResult(nil, error));
       }];
     }

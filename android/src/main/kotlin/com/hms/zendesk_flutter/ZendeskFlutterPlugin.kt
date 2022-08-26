@@ -19,6 +19,7 @@ import zendesk.core.Zendesk
 import zendesk.messaging.Engine
 import zendesk.messaging.MessagingActivity
 import zendesk.support.Support
+import zendesk.support.guide.ArticleConfiguration
 import zendesk.support.guide.HelpCenterActivity
 import zendesk.support.guide.HelpCenterConfiguration
 
@@ -39,6 +40,9 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
     private var visitorTagsToAdd: List<String> = listOf()
     private var visitorTagsToRemove: List<String> = listOf()
 
+    private val flutterPluginBindingLoggerTag = "FlutterPluginBindingLogger"
+    private val activityPluginBindingLoggerTag = "ActivityPluginBindingLogger"
+
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         ZendeskPigeon.SupportSDKApi.setup(flutterPluginBinding.binaryMessenger, this)
         ZendeskPigeon.ChatSDKV2Api.setup(flutterPluginBinding.binaryMessenger, this)
@@ -46,6 +50,7 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
         ZendeskPigeon.ProfileProviderApi.setup(flutterPluginBinding.binaryMessenger, this)
 
         applicationContext = flutterPluginBinding.applicationContext
+        Logger.i(flutterPluginBindingLoggerTag, "onAttachedToEngine")
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
@@ -55,22 +60,27 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
         ZendeskPigeon.ProfileProviderApi.setup(binding.binaryMessenger, null)
 
         applicationContext = null
+        Logger.i(flutterPluginBindingLoggerTag, "onDetachedFromEngine")
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
+        Logger.i(activityPluginBindingLoggerTag, "onAttachedToActivity")
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
         activity = null
+        Logger.i(activityPluginBindingLoggerTag, "onDetachedFromActivityForConfigChanges")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activity = binding.activity
+        Logger.i(activityPluginBindingLoggerTag, "onReattachedToActivityForConfigChanges")
     }
 
     override fun onDetachedFromActivity() {
         activity = null
+        Logger.i(activityPluginBindingLoggerTag, "onDetachedFromActivity")
     }
 
     override fun initializeSupportSDK(request: ZendeskPigeon.SupportSDKInitializeRequest) {
@@ -92,14 +102,18 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
 
         val chatEngine: Engine? = ChatEngine.engine()
 
-        val helpCenterConfiguration: Configuration = HelpCenterConfiguration.Builder()
+        val helpCenterConfiguration = HelpCenterConfiguration.Builder()
             .withShowConversationsMenuButton(false)
             .withEngines(chatEngine)
             .config()
 
+        val articleConfiguration = ArticleConfiguration.Builder()
+            .withContactUsButtonVisible(false)
+            .config()
+
         activity.startActivity(
             HelpCenterActivity.builder()
-                .intent(applicationContext, helpCenterConfiguration)
+                .intent(applicationContext, helpCenterConfiguration, articleConfiguration)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
@@ -202,10 +216,15 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
     }
 
     override fun registerPushToken(request: ZendeskPigeon.RegisterPushTokenRequest) {
-        val pushProvider = Chat.INSTANCE.providers()!!.pushNotificationsProvider()
-        pushProvider?.registerPushToken(
+        val pushProvider = getChatPushNotificationProvider()
+        pushProvider.registerPushToken(
             request.pushToken,
         )
+    }
+
+    override fun unregisterPushToken() {
+        val pushProvider = getChatPushNotificationProvider()
+        pushProvider.unregisterPushToken()
     }
 
     override fun startChat() {
@@ -223,12 +242,16 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
     }
 
     override fun setVisitorIdentity(request: ZendeskPigeon.SetVisitorIdentityRequest) {
+        var identity = AnonymousIdentity.Builder()
         var visitorInfo = VisitorInfo.builder()
+
         if (!TextUtils.isEmpty(request.name)) {
+            identity = identity.withNameIdentifier(request.name)
             visitorInfo = visitorInfo.withName(request.name)
         }
 
         if (!TextUtils.isEmpty(request.email)) {
+            identity = identity.withEmailIdentifier(request.email)
             visitorInfo = visitorInfo.withEmail(request.email)
         }
 
@@ -240,14 +263,31 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
             .withVisitorInfo(visitorInfo.build())
             .build()
 
+        Zendesk.INSTANCE.setIdentity(identity.build())
         Chat.INSTANCE.chatProvidersConfiguration = chatProvidersConfiguration
+    }
 
-        val identity: Identity = AnonymousIdentity.Builder()
-            .withNameIdentifier(request.name)
-            .withEmailIdentifier(request.email)
-            .build()
+    override fun clearVisitorIdentity() {
+        val defaultAnonymousIdentity = AnonymousIdentity()
+        Zendesk.INSTANCE.setIdentity(defaultAnonymousIdentity)
 
-        Zendesk.INSTANCE.setIdentity(identity)
+        Chat.INSTANCE.resetIdentity()
+
+        visitorNoteToSet = ""
+        visitorTagsToAdd = listOf()
+        visitorTagsToRemove = listOf()
+    }
+
+    override fun addVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
+        visitorTagsToAdd = request.tags
+    }
+
+    override fun removeVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
+        visitorTagsToRemove = request.tags
+    }
+
+    override fun setVisitorCustomInfo(request: ZendeskPigeon.SetVisitorCustomInfoRequest) {
+        visitorNoteToSet = request.customInfo
 
         val userProvider = Zendesk.INSTANCE.provider()!!.userProvider()
         val userFields: MutableMap<String, String> = HashMap()
@@ -266,26 +306,6 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
             })
     }
 
-    override fun clearVisitorInfo() {
-        visitorNoteToSet = ""
-        visitorTagsToAdd = listOf()
-        visitorTagsToRemove = listOf()
-
-        Chat.INSTANCE.resetIdentity()
-    }
-
-    override fun addVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
-        visitorTagsToAdd = request.tags
-    }
-
-    override fun removeVisitorTags(request: ZendeskPigeon.VisitorTagsRequest) {
-        visitorTagsToRemove = request.tags
-    }
-
-    override fun setVisitorCustomInfo(request: ZendeskPigeon.SetVisitorCustomInfoRequest) {
-        visitorNoteToSet = request.customInfo;
-    }
-
     private fun getChatProfileProvider(): ProfileProvider {
         val providers = Chat.INSTANCE.providers()
             ?: throw java.lang.IllegalArgumentException("ChatProviders not set, did you initialized Chat SDK?")
@@ -297,6 +317,12 @@ class ZendeskFlutterPlugin : FlutterPlugin, ActivityAware, ZendeskPigeon.Support
         val providers = Chat.INSTANCE.providers()
             ?: throw java.lang.IllegalArgumentException("ChatProviders not set, did you initialized Chat SDK?")
         return providers.connectionProvider()
+    }
+
+    private fun getChatPushNotificationProvider(): PushNotificationsProvider {
+        val providers = Chat.INSTANCE.providers()
+            ?: throw java.lang.IllegalArgumentException("ChatProviders not set, did you initialized Chat SDK?")
+        return providers.pushNotificationsProvider()
     }
 
     private fun getApplicationContext(): Context {

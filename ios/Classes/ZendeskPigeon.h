@@ -98,6 +98,7 @@ NSObject<FlutterMessageCodec> *ChatSDKV2ApiGetCodec(void);
 @protocol ChatSDKV2Api
 - (void)initializeChatSDKRequest:(ChatSDKV2InitializeRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)registerPushTokenRequest:(RegisterPushTokenRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)unregisterPushTokenWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)startChatWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
@@ -111,7 +112,7 @@ NSObject<FlutterMessageCodec> *ProfileProviderApiGetCodec(void);
 - (void)addVisitorTagsRequest:(VisitorTagsRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)removeVisitorTagsRequest:(VisitorTagsRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setVisitorCustomInfoRequest:(SetVisitorCustomInfoRequest *)request error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)clearVisitorInfoWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)clearVisitorIdentityWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void ProfileProviderApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<ProfileProviderApi> *_Nullable api);
